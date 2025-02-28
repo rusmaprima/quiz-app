@@ -18,7 +18,7 @@
             margin: 50px auto;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
         }
         h1 {
             color: #333;
@@ -30,31 +30,51 @@
         .options button {
             display: block;
             width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            background-color: #007bff;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 16px;
+            font-weight: bold;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: background 0.3s, transform 0.2s;
         }
+        .options button:nth-child(1) { background-color: #ff5733; }
+        .options button:nth-child(2) { background-color: #33c4ff; }
+        .options button:nth-child(3) { background-color: #33ff57; }
+        .options button:nth-child(4) { background-color: #ff33a8; }
         .options button:hover {
-            background-color: #0056b3;
+            transform: scale(1.05);
         }
         .hidden {
             display: none;
         }
         #score {
-            font-size: 20px;
+            font-size: 22px;
             margin-top: 20px;
+            color: #333;
+        }
+        .illustration {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        #timer {
+            font-size: 20px;
+            font-weight: bold;
+            color: red;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
     <div class="quiz-container">
         <h1>Management Quiz</h1>
+        <img id="quiz-image" class="illustration" src="https://via.placeholder.com/600x300" alt="Quiz Illustration">
         <div id="question-container"></div>
+        <div id="timer">Time left: <span id="time-left">10</span>s</div>
         <button id="next-btn" class="hidden">Next Question</button>
         <h2 id="score" class="hidden"></h2>
     </div>
@@ -64,33 +84,42 @@
             {
                 question: "___________ is the process of authorizing an individual to think, behave, act, and control work and decision-making in autonomous ways.",
                 options: ["Empowering", "Controlling", "Directing", "Leading"],
-                answer: "Empowering"
+                answer: "Empowering",
+                image: "https://via.placeholder.com/600x300/ff5733/ffffff?text=Empowerment"
             },
             {
                 question: "The three informational roles assumed by a manager are primarily concerned with providing information outside the organization.",
                 options: ["True", "False"],
-                answer: "False"
+                answer: "False",
+                image: "https://via.placeholder.com/600x300/33c4ff/ffffff?text=Management+Roles"
             },
             {
                 question: "Name the managerial role for the efficiency and effectiveness of a particular department, such as human resources or sales.",
                 options: ["Functional managers", "Team managers", "Staff managers", "Project managers"],
-                answer: "Functional managers"
+                answer: "Functional managers",
+                image: "https://via.placeholder.com/600x300/33ff57/ffffff?text=Managerial+Roles"
             }
         ];
 
         let currentQuestionIndex = 0;
         let score = 0;
+        let timer;
         const questionContainer = document.getElementById("question-container");
         const nextButton = document.getElementById("next-btn");
         const scoreDisplay = document.getElementById("score");
+        const quizImage = document.getElementById("quiz-image");
+        const timeLeftDisplay = document.getElementById("time-left");
 
         function loadQuestion() {
+            clearInterval(timer);
             questionContainer.innerHTML = "";
             const questionObj = quizData[currentQuestionIndex];
             const questionElement = document.createElement("div");
             questionElement.classList.add("question");
             questionElement.textContent = questionObj.question;
             questionContainer.appendChild(questionElement);
+
+            quizImage.src = questionObj.image;
 
             const optionsContainer = document.createElement("div");
             optionsContainer.classList.add("options");
@@ -102,9 +131,25 @@
                 optionsContainer.appendChild(button);
             });
             questionContainer.appendChild(optionsContainer);
+            
+            startTimer();
+        }
+
+        function startTimer() {
+            let timeLeft = 10;
+            timeLeftDisplay.textContent = timeLeft;
+            timer = setInterval(() => {
+                timeLeft--;
+                timeLeftDisplay.textContent = timeLeft;
+                if (timeLeft === 0) {
+                    clearInterval(timer);
+                    nextQuestion();
+                }
+            }, 1000);
         }
 
         function checkAnswer(button, selected, correct) {
+            clearInterval(timer);
             if (selected === correct) {
                 button.style.backgroundColor = "#28a745";
                 score++;
@@ -116,7 +161,7 @@
             }, 500);
         }
 
-        nextButton.addEventListener("click", () => {
+        function nextQuestion() {
             currentQuestionIndex++;
             if (currentQuestionIndex < quizData.length) {
                 loadQuestion();
@@ -127,7 +172,9 @@
                 scoreDisplay.classList.remove("hidden");
                 nextButton.classList.add("hidden");
             }
-        });
+        }
+
+        nextButton.addEventListener("click", nextQuestion);
 
         loadQuestion();
     </script>
